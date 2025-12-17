@@ -1,0 +1,256 @@
+// src/world/flocking/createFlockingMotes.js
+import * as THREE from "three";
+import { Boid, FlockingSystem } from "../../algorithms/flocking.js";
+
+export function createFlockingMotes(config, scene) {
+  if (!config || !config.agents || config.agents.length === 0) return null;
+
+  const { agents: agentConfigs, behavior } = config;
+
+  // Default behavior if none provided
+  const behaviorConfig = behavior || {
+    separation: 1.5,
+    alignment: 1.0,
+    cohesion: 1.0,
+    separationRadius: 2.0,
+    neighborRadius: 5.0,
+    maxSpeed: 5.0,
+    maxForce: 0.1,
+    boundsWidth: 50,
+    boundsDepth: 50,
+    planeHeight: 50,
+  };
+
+  // Get environment map from scene (prefer environment over background)
+  const envMap = scene.environment?.isCubeTexture 
+    ? scene.environment 
+    : (scene.background?.isCubeTexture ? scene.background : null);
+
+  // Create white reflective material
+  const material = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    metalness: 1.0,
+    roughness: 0.0,
+    envMap: envMap,
+    envMapIntensity: 1.5,
+  });
+
+  // Create a group to hold all agents
+  const group = new THREE.Group();
+  group.name = "flockingAgents";
+
+  // Create agents (boids) and meshes from node configurations
+  const boids = [];
+  const meshes = [];
+  const agentMap = new Map(); // Map agent ID to index
+
+  // Initialize flocking system
+  const flockingSystem = new FlockingSystem({
+    separation: behaviorConfig.separation,
+    alignment: behaviorConfig.alignment,
+    cohesion: behaviorConfig.cohesion,
+    separationRadius: behaviorConfig.separationRadius,
+    neighborRadius: behaviorConfig.neighborRadius,
+    maxSpeed: behaviorConfig.maxSpeed,
+    maxForce: behaviorConfig.maxForce,
+    bounds: { 
+      width: behaviorConfig.boundsWidth, 
+      height: 10, 
+      depth: behaviorConfig.boundsDepth 
+    },
+    center: new THREE.Vector3(0, behaviorConfig.planeHeight, 0),
+    planeHeight: behaviorConfig.planeHeight,
+  });
+
+  // Create agents from node configurations (start dispersed, will coalesce)
+  agentConfigs.forEach((agentConfig) => {
+    const position = new THREE.Vector3(
+      agentConfig.positionX,
+      agentConfig.positionY,
+      agentConfig.positionZ
+    );
+    let velocity = new THREE.Vector3(
+      agentConfig.velocityX ?? (Math.random() - 0.5) * 4,
+      agentConfig.velocityY ?? (Math.random() - 0.5) * 1,
+      agentConfig.velocityZ ?? (Math.random() - 0.5) * 4
+    );
+    
+    // If velocity is zero or very small, give it a random direction (more dispersed)
+    if (velocity.length() < 0.01) {
+      velocity = new THREE.Vector3(
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 1,
+        (Math.random() - 0.5) * 4
+      );
+    }
+    
+    velocity.normalize().multiplyScalar(3); // Start with higher initial speed for dispersal
+
+    // Create boid (agent)
+    const boid = new Boid(position, velocity);
+    flockingSystem.addBoid(boid);
+    boids.push(boid);
+    agentMap.set(agentConfig.id, boids.length - 1);
+
+    // Create white reflective cube
+    const geometry = new THREE.BoxGeometry(
+      agentConfig.size || 0.3,
+      agentConfig.size || 0.3,
+      agentConfig.size || 0.3
+    );
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.copy(position);
+    mesh.castShadow = true;
+    mesh.receiveShadow = false;
+    mesh.userData.agentId = agentConfig.id;
+
+    group.add(mesh);
+    meshes.push(mesh);
+  });
+
+  // Add group to scene
+  scene.add(group);
+
+  // Return system for updates
+  return {
+    group,
+    flockingSystem,
+    boids,
+    meshes,
+    agentMap,
+    update: (deltaTime) => {
+      // Update flocking system
+      flockingSystem.update(deltaTime);
+
+      // Update mesh positions to match boid positions
+      for (let i = 0; i < boids.length; i++) {
+        meshes[i].position.copy(boids[i].position);
+        
+        // Orient mesh to face velocity direction
+        if (boids[i].velocity.length() > 0.01) {
+          meshes[i].lookAt(
+            boids[i].position.clone().add(boids[i].velocity.clone().normalize())
+          );
+        }
+      }
+    },
+    updateConfig: (newConfig) => {
+      if (!newConfig || !newConfig.agents) return;
+
+      const { agents: newAgentConfigs, behavior: newBehavior } = newConfig;
+
+      // Update behavior
+      if (newBehavior) {
+        flockingSystem.updateConfig({
+          separation: newBehavior.separation,
+          alignment: newBehavior.alignment,
+          cohesion: newBehavior.cohesion,
+          separationRadius: newBehavior.separationRadius,
+          neighborRadius: newBehavior.neighborRadius,
+          maxSpeed: newBehavior.maxSpeed,
+          maxForce: newBehavior.maxForce,
+          bounds: { 
+            width: newBehavior.boundsWidth, 
+            height: 10, 
+            depth: newBehavior.boundsDepth 
+          },
+          planeHeight: newBehavior.planeHeight,
+        });
+      }
+
+      // Update existing agents or add/remove
+      const existingIds = new Set();
+      
+      newAgentConfigs.forEach((agentConfig) => {
+        existingIds.add(agentConfig.id);
+        
+        const index = agentMap.get(agentConfig.id);
+        if (index !== undefined) {
+          // Update existing agent position
+          const boid = boids[index];
+          boid.position.set(
+            agentConfig.positionX,
+            agentConfig.positionY,
+            agentConfig.positionZ
+          );
+          
+          // Update mesh size if changed
+          if (agentConfig.size !== undefined) {
+            meshes[index].scale.setScalar(agentConfig.size / (agentConfig.size || 0.3));
+          }
+        } else {
+          // Add new agent
+          const position = new THREE.Vector3(
+            agentConfig.positionX,
+            agentConfig.positionY,
+            agentConfig.positionZ
+          );
+          let velocity = new THREE.Vector3(
+            agentConfig.velocityX ?? (Math.random() - 0.5) * 4,
+            agentConfig.velocityY ?? (Math.random() - 0.5) * 1,
+            agentConfig.velocityZ ?? (Math.random() - 0.5) * 4
+          );
+          
+          // If velocity is zero or very small, give it a random direction
+          if (velocity.length() < 0.01) {
+            velocity = new THREE.Vector3(
+              (Math.random() - 0.5) * 4,
+              (Math.random() - 0.5) * 1,
+              (Math.random() - 0.5) * 4
+            );
+          }
+          
+          velocity.normalize().multiplyScalar(3);
+
+          const boid = new Boid(position, velocity);
+          flockingSystem.addBoid(boid);
+          boids.push(boid);
+          agentMap.set(agentConfig.id, boids.length - 1);
+
+          const geometry = new THREE.BoxGeometry(
+            agentConfig.size || 0.3,
+            agentConfig.size || 0.3,
+            agentConfig.size || 0.3
+          );
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.position.copy(position);
+          mesh.castShadow = true;
+          mesh.receiveShadow = false;
+          mesh.userData.agentId = agentConfig.id;
+          group.add(mesh);
+          meshes.push(mesh);
+        }
+      });
+
+      // Remove agents that are no longer in config
+      for (let i = boids.length - 1; i >= 0; i--) {
+        const agentId = Array.from(agentMap.entries()).find(([_, idx]) => idx === i)?.[0];
+        if (agentId && !existingIds.has(agentId)) {
+          const boid = boids[i];
+          flockingSystem.removeBoid(boid);
+          boids.splice(i, 1);
+          
+          const mesh = meshes[i];
+          group.remove(mesh);
+          mesh.geometry.dispose();
+          meshes.splice(i, 1);
+          
+          agentMap.delete(agentId);
+          
+          // Update indices in map
+          agentMap.forEach((idx, id) => {
+            if (idx > i) agentMap.set(id, idx - 1);
+          });
+        }
+      }
+    },
+    dispose: () => {
+      // Clean up
+      meshes.forEach((mesh) => {
+        mesh.geometry.dispose();
+      });
+      material.dispose();
+      scene.remove(group);
+    },
+  };
+}

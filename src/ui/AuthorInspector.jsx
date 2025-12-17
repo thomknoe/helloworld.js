@@ -7,35 +7,38 @@ export default function AuthorInspector({ activeDomain }) {
   // MAP DOMAIN -> PREVIEW TITLE + COMPONENT
   // ---------------------------------------------
   const previews = {
-    environment: {
+    noiseHeightfields: {
       title: "Terrain Preview",
       component: <TerrainPreview />,
     },
-    characters: {
-      title: "Character Preview",
+    simulationNatural: {
+      title: "Simulation Preview",
       component: (
         <div className="inspector-placeholder">
+          Simulation preview coming soon.
         </div>
       ),
     },
-    objects: {
-      title: "Object Preview",
+    structuralGenerative: {
+      title: "Structural Preview",
       component: (
         <div className="inspector-placeholder">
+          Structural preview coming soon.
         </div>
       ),
     },
-    scenarios: {
-      title: "Scenario Preview",
+    agentBehavior: {
+      title: "Agent Behavior Preview",
       component: (
         <div className="inspector-placeholder">
+          Agent behavior preview coming soon.
         </div>
       ),
     },
   };
 
   // fallback if domain missing
-  const { title, component } = previews[activeDomain] || previews.environment;
+  const { title, component } = previews[activeDomain] || previews.noiseHeightfields;
 
   return (
     <aside className="author-inspector">

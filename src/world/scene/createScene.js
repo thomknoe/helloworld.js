@@ -16,7 +16,7 @@ export default function createScene(mount) {
   // -----------------------------
   // SKY
   // -----------------------------
-  scene.background = loadSkybox([
+  const skybox = loadSkybox([
     "assets/skybox/px.jpg",
     "assets/skybox/nx.jpg",
     "assets/skybox/py.jpg",
@@ -24,6 +24,8 @@ export default function createScene(mount) {
     "assets/skybox/pz.jpg",
     "assets/skybox/nz.jpg",
   ]);
+  scene.background = skybox;
+  scene.environment = skybox; // For reflections
 
   scene.fog = new THREE.Fog(0xddefff, 120, 280);
 

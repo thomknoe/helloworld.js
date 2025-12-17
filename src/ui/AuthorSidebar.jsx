@@ -1,24 +1,34 @@
-import { Globe, User, Box, GitBranch } from "lucide-react";
+import { Waves, Zap, Network, Users } from "lucide-react";
 
 const DOMAINS = [
-  { id: "environment", label: "Environment", icon: Globe },
-  { id: "characters", label: "Characters", icon: User },
-  { id: "objects", label: "Objects", icon: Box },
-  { id: "scenarios", label: "Scenarios", icon: GitBranch },
+  { id: "noiseHeightfields", label: "Noise & Heightfields", icon: Waves },
+  { id: "simulationNatural", label: "Simulation & Natural Systems", icon: Zap },
+  { id: "structuralGenerative", label: "Structural / Generative Grammars", icon: Network },
+  { id: "agentBehavior", label: "Agent & Behavior Systems", icon: Users },
 ];
 
 export default function AuthorSidebar({
   activeDomain,
   setActiveDomain,
 
-  // Environment nodes
+  // Noise & Heightfields nodes
   onAddTerrainNode,
   onAddPerlinNoise,
   onAddNumberSlider,
   onAddPanelNode,
 
-  // Character nodes
-  onAddNPCNode
+  // Agent & Behavior Systems nodes
+  onAddAgentNode,
+  onAddFlockingNode,
+
+  // Simulation & Natural Systems nodes
+  onAddLSystemNode,
+  onAddPlantNode,
+  onAddFlowerNode,
+
+  // Structural / Generative Grammars nodes
+  onAddBuildingGrammarNode,
+  onAddBuildingNode
 }) {
   return (
     <aside className="author-sidebar">
@@ -62,8 +72,8 @@ export default function AuthorSidebar({
 
           <div className="preset-library-list">
 
-            {/* ENVIRONMENT DOMAIN */}
-            {activeDomain === "environment" && (
+            {/* NOISE & HEIGHTFIELDS DOMAIN */}
+            {activeDomain === "noiseHeightfields" && (
               <div className="preset-node-list">
                 <button
                   className="preset-node-item"
@@ -95,29 +105,63 @@ export default function AuthorSidebar({
               </div>
             )}
 
-            {/* CHARACTERS DOMAIN */}
-            {activeDomain === "characters" && (
+            {/* SIMULATION & NATURAL SYSTEMS DOMAIN */}
+            {activeDomain === "simulationNatural" && (
               <div className="preset-node-list">
                 <button
                   className="preset-node-item"
-                  onClick={onAddNPCNode}
+                  onClick={onAddLSystemNode}
                 >
-                  Add NPC
+                  Add L-System Node
+                </button>
+                <button
+                  className="preset-node-item"
+                  onClick={onAddPlantNode}
+                >
+                  Add Plant Node
+                </button>
+                <button
+                  className="preset-node-item"
+                  onClick={onAddFlowerNode}
+                >
+                  Add Flower Node
                 </button>
               </div>
             )}
 
-            {/* OBJECTS DOMAIN */}
-            {activeDomain === "objects" && (
-              <div className="preset-placeholder">
-                No object nodes yet.
+            {/* STRUCTURAL / GENERATIVE GRAMMARS DOMAIN */}
+            {activeDomain === "structuralGenerative" && (
+              <div className="preset-node-list">
+                <button
+                  className="preset-node-item"
+                  onClick={onAddBuildingGrammarNode}
+                >
+                  Add Building Grammar Node
+                </button>
+                <button
+                  className="preset-node-item"
+                  onClick={onAddBuildingNode}
+                >
+                  Add Building Node
+                </button>
               </div>
             )}
 
-            {/* SCENARIOS DOMAIN */}
-            {activeDomain === "scenarios" && (
-              <div className="preset-placeholder">
-                No scenario nodes yet.
+            {/* AGENT & BEHAVIOR SYSTEMS DOMAIN */}
+            {activeDomain === "agentBehavior" && (
+              <div className="preset-node-list">
+                <button
+                  className="preset-node-item"
+                  onClick={onAddAgentNode}
+                >
+                  Add Agents Node
+                </button>
+                <button
+                  className="preset-node-item"
+                  onClick={onAddFlockingNode}
+                >
+                  Add Flocking Behavior Node
+                </button>
               </div>
             )}
 

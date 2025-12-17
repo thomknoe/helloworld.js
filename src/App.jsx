@@ -6,9 +6,10 @@ import Portal from "./ui/Portal.jsx";
 export default function App() {
   const [isAuthorMode, setIsAuthorMode] = useState(false);
   const [terrainConfig, setTerrainConfig] = useState(null);
-
-  // NEW — NPC configuration storage
-  const [npcConfigs, setNPCConfigs] = useState([]);
+  const [flockingConfig, setFlockingConfig] = useState(null);
+  const [plantConfigs, setPlantConfigs] = useState([]);
+  const [buildingConfigs, setBuildingConfigs] = useState([]);
+  const [flowerConfigs, setFlowerConfigs] = useState([]);
 
   const toggleAuthorMode = useCallback(() => {
     setIsAuthorMode((prev) => !prev);
@@ -30,7 +31,10 @@ export default function App() {
       <PlayerView
         isAuthorMode={isAuthorMode}
         terrainConfig={terrainConfig}
-        npcConfigs={npcConfigs}     // ← NEW
+        flockingConfig={flockingConfig}
+        plantConfigs={plantConfigs}
+        buildingConfigs={buildingConfigs}
+        flowerConfigs={flowerConfigs}
       />
 
       <Portal>
@@ -51,7 +55,10 @@ export default function App() {
           <div className="author-overlay-shell">
             <AuthorCanvas
               onTerrainConfigChange={setTerrainConfig}
-              onNPCConfigChange={setNPCConfigs}    // ← NEW
+              onFlockingConfigChange={setFlockingConfig}
+              onPlantConfigChange={setPlantConfigs}
+              onBuildingConfigChange={setBuildingConfigs}
+              onFlowerConfigChange={setFlowerConfigs}
             />
           </div>
         </div>

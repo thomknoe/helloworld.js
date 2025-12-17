@@ -92,6 +92,7 @@ export default function PerlinNoiseNode({ id, data }) {
 
     onOutput?.({
       id,
+      type: "perlinNoise",
       value,
       seed,
       scale,
@@ -210,12 +211,31 @@ export default function PerlinNoiseNode({ id, data }) {
         />
       </div>
 
-      {/* Output handle */}
+      {/* Output handle - EMPHASIZED */}
+      <div style={{ 
+        position: 'absolute', 
+        right: '-100px', 
+        top: '115px', 
+        fontSize: '11px', 
+        color: '#4a9e4a',
+        fontWeight: 'bold',
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none'
+      }}>
+        Perlin Noise →
+      </div>
       <Handle
         type="source"
         position={Position.Right}
         id="config"
-        style={{ top: 120 }}
+        style={{ 
+          top: 120,
+          width: '12px',
+          height: '12px',
+          background: '#4a9e4a',
+          border: '2px solid #ffffff',
+          boxShadow: '0 0 8px rgba(74, 158, 74, 0.6)'
+        }}
       />
     </div>
   );

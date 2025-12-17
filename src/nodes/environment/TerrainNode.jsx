@@ -27,20 +27,58 @@ export default function TerrainNode({ id, data }) {
         <div className="node-terrain-status">{status}</div>
       </div>
 
-      {/* Accept Perlin config */}
+      {/* Accept Perlin config - EMPHASIZED */}
+      <div style={{ 
+        position: 'absolute', 
+        left: '-90px', 
+        top: '35px', 
+        fontSize: '11px', 
+        color: '#4a90e2',
+        fontWeight: 'bold',
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none'
+      }}>
+        ← Perlin Noise
+      </div>
       <Handle
         type="target"
         position={Position.Left}
         id="config"
-        style={{ top: 40 }}
+        style={{ 
+          top: 40,
+          width: '12px',
+          height: '12px',
+          background: '#4a90e2',
+          border: '2px solid #ffffff',
+          boxShadow: '0 0 8px rgba(74, 144, 226, 0.6)'
+        }}
       />
 
-      {/* Forward terrain config downstream if needed */}
+      {/* Forward terrain config downstream if needed - EMPHASIZED */}
+      <div style={{ 
+        position: 'absolute', 
+        right: '-80px', 
+        top: '35px', 
+        fontSize: '11px', 
+        color: '#4a9e4a',
+        fontWeight: 'bold',
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none'
+      }}>
+        Terrain →
+      </div>
       <Handle
         type="source"
         position={Position.Right}
         id="out"
-        style={{ top: 40 }}
+        style={{ 
+          top: 40,
+          width: '12px',
+          height: '12px',
+          background: '#4a9e4a',
+          border: '2px solid #ffffff',
+          boxShadow: '0 0 8px rgba(74, 158, 74, 0.6)'
+        }}
       />
     </div>
   );
