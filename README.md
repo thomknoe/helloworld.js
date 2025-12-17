@@ -24,6 +24,7 @@ Visit the web application at [https://thomknoe.github.io/helloworld.js/](https:/
 - **Connect handles** — Link nodes by dragging from output to input handles
 - **Click nodes** — Select and configure node parameters
 - **P** — Toggle back to Player Mode
+- **Escape** — Unlock mouse cursor (required when switching to Author Mode from Player Mode)
 
 # Detailed Guide
 
