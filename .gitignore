@@ -37,3 +37,4 @@ lerna-debug.log*
 # gh-pages cache
 node_modules/.cache/gh-pages/
 
+node_modules
